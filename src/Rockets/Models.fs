@@ -27,7 +27,7 @@ type Message =
     | _ -> false
   override this.GetHashCode () = (this.Channel,this.MessageNumber).GetHashCode()
   interface IComparable<Message> with
-    member this.CompareTo other = other.MessageNumber.CompareTo this.MessageNumber
+    member this.CompareTo other = this.MessageNumber.CompareTo other.MessageNumber
   interface IComparable with
     member this.CompareTo other =
         match other with
@@ -94,5 +94,11 @@ type Rocket =
       |> Set.fold updateState initialState
 
     | _ -> failwith $"No launch message received for rocket {this.Channel} yet."
+
+  static member FromMessage (msg:Message) =
+    {
+      Messages = Set.empty.Add msg
+      Channel = msg.Channel
+    }
 
 

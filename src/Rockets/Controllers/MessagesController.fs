@@ -6,6 +6,7 @@ open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.Logging
 open Microsoft.AspNetCore.Http
 open Newtonsoft.Json
+open RocketManager
 open Microsoft.AspNetCore.Mvc
 
 
@@ -98,26 +99,18 @@ type MessageDto =
 
 [<ApiController>]
 [<Route("[controller]")>]
-type MessagesController (logger : ILogger<MessagesController>) =
+type MessagesController (logger : ILogger<MessagesController>, rocketManager:RocketManager) =
     inherit ControllerBase()
 
-    let summaries =
-        [|
-            "Freezing"
-            "Bracing"
-            "Chilly"
-            "Cool"
-            "Mild"
-            "Warm"
-            "Balmy"
-            "Hot"
-            "Sweltering"
-            "Scorching"
-        |]
 
     [<HttpGet>]
     member _.Get() =
-       summaries
+       rocketManager.GetAllRocketStates()
+
+    [<HttpGet>]
+    [<Route("test")>]
+    member _.GetTest() =
+       rocketManager.GetAllRockets()
 
     [<HttpPost>]
     [<ProducesResponseType(StatusCodes.Status200OK)>]
@@ -125,9 +118,9 @@ type MessagesController (logger : ILogger<MessagesController>) =
     member _.Post(message:MessageDto) =
       try
         let modelMessage = message.toMessage()
-        logger.LogDebug $"He there {modelMessage}"
-
-        ok modelMessage
+        logger.LogDebug $"Message Post {modelMessage}"
+        rocketManager.AddMessage modelMessage
+        created modelMessage
       with
       | e ->
         logger.LogWarning(e,"Exception in handling Post message")
