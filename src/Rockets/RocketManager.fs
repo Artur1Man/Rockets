@@ -7,14 +7,22 @@ open Models
 type private ManagerAction =
 | AddMessage of Message
 | GetRocketState of channel:string * AsyncReplyChannel<RocketState option>
-| GetAllRocketStates of AsyncReplyChannel<RocketState[]>
-| GetAllRockets of AsyncReplyChannel<Rocket[]>
+| GetRocketStateAll of RocketSorting * AsyncReplyChannel<RocketState[]>
+| GetMessage of channel:string * AsyncReplyChannel<Rocket option>
+| GetMessageAll of RocketSorting * AsyncReplyChannel<Rocket[]>
 
 
 type RocketManager(logger : ILogger<RocketManager>) =
   let mutable rockets : Map<string,Rocket> = Map.empty
 
   let cts = new CancellationTokenSource()
+
+  let sortingFunct (rocketSorting) (rockets:Rocket[]) =
+    match rocketSorting with
+    | RocketSorting.ByChannel -> rockets |> Array.sortBy (fun x -> x.Channel)
+    | RocketSorting.ByTime -> rockets |> Array.sortBy (fun x -> x.EarliestMessageTime())
+    | RocketSorting.ByTimeDesc -> rockets |> Array.sortByDescending (fun x -> x.EarliestMessageTime())
+    | _ -> rockets |> Array.sortBy (fun x -> x.Channel)
 
   let body (inbox : MailboxProcessor<ManagerAction>) =
     let loop () =
@@ -35,11 +43,13 @@ type RocketManager(logger : ILogger<RocketManager>) =
             | Some rocket -> rocket.CurrentState() |> Some
             | None -> None
           replyChannel.Reply rocketState
-        | GetAllRocketStates replyChannel ->
+        | GetRocketStateAll (rocketSorting, replyChannel) ->
           let rocketStates =
             rockets
             |> Map.values
-            |> Seq.choose (fun r -> 
+            |> Seq.toArray
+            |> sortingFunct rocketSorting
+            |> Array.choose (fun r -> 
                 try
                   r.CurrentState() |> Some
                 with
@@ -47,10 +57,12 @@ type RocketManager(logger : ILogger<RocketManager>) =
                   logger.LogWarning(e,"Could not get state for rocket")
                   None
               )
-            |> Seq.toArray
           replyChannel.Reply rocketStates
-        | GetAllRockets replyChannel ->
-          let alRockets = rockets |> Map.values |> Seq.toArray
+        | GetMessage (channel, replyChannel) ->
+          let rocket = Map.tryFind channel rockets
+          replyChannel.Reply rocket
+        | GetMessageAll (rocketSorting, replyChannel) ->
+          let alRockets = rockets |> Map.values |> Seq.toArray |> sortingFunct rocketSorting
           replyChannel.Reply alRockets
       }
 
@@ -71,8 +83,11 @@ type RocketManager(logger : ILogger<RocketManager>) =
   member _.GetRocketState (channel:string) =
     rocketAgent.PostAndAsyncReply (fun reply -> GetRocketState (channel,reply))
 
-  member _.GetAllRocketStates() =
-    rocketAgent.PostAndAsyncReply (fun reply -> GetAllRocketStates reply)
+  member _.GetRocketStateAll (sorting:RocketSorting) =
+    rocketAgent.PostAndAsyncReply (fun reply -> GetRocketStateAll (sorting,reply))
 
-  member _.GetAllRockets() =
-    rocketAgent.PostAndAsyncReply (fun reply -> GetAllRockets reply)
+  member _.GetMessage (channel:string) =
+    rocketAgent.PostAndAsyncReply (fun reply -> GetMessage (channel,reply))
+
+  member _.GetMessageAll (sorting:RocketSorting) =
+    rocketAgent.PostAndAsyncReply (fun reply -> GetMessageAll (sorting,reply))

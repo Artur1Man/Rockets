@@ -34,6 +34,11 @@ type Message =
         | :? Message as p -> (this :> IComparable<_>).CompareTo p
         | _ -> -1
 
+type RocketSorting = 
+| ByChannel = 0
+| ByTime = 1
+| ByTimeDesc = 2
+
 type RocketStatus =
 | Operational
 | Exploded of reason:string
@@ -48,8 +53,8 @@ type RocketState = {
 
 type Rocket =
   {
-    Messages : Set<Message>
     Channel : string
+    Messages : Set<Message>
   }
   member this.AddMessage (msg:Message) =
     {
@@ -94,6 +99,10 @@ type Rocket =
       |> Set.fold updateState initialState
 
     | _ -> failwith $"No launch message received for rocket {this.Channel} yet."
+
+  member this.EarliestMessageTime() =
+    let earliestMessage = this.Messages.MinimumElement
+    earliestMessage.MessageTime
 
   static member FromMessage (msg:Message) =
     {

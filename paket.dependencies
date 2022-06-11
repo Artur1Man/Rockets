@@ -9,6 +9,7 @@ nuget NSwag.AspNetCore
 nuget Microsoft.AspNetCore.Mvc.NewtonsoftJson
 nuget Microsoft.FeatureManagement.AspNetCore
 nuget FSharp.Data
+nuget Microsoft.FSharpLu.Json
 
 
 

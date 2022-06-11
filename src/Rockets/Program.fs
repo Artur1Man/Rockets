@@ -4,8 +4,21 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open NJsonSchema.Generation
+open Newtonsoft.Json
+open Newtonsoft.Json.Converters
+open Newtonsoft.Json.Serialization
+open Microsoft.FSharpLu.Json
 
 open RocketManager
+
+module Serializer =
+  let adjustSettings (settings: JsonSerializerSettings) =
+    settings.ContractResolver <- CamelCasePropertyNamesContractResolver()
+    settings.NullValueHandling <- NullValueHandling.Ignore
+    settings.DefaultValueHandling <- DefaultValueHandling.Populate
+    settings.Converters.Add(StringEnumConverter(AllowIntegerValues = false))
+    settings.Converters.Add(CompactUnionJsonConverter())
+    settings
 
     
 [<EntryPoint>]
@@ -23,7 +36,7 @@ let main args =
     )
     .AddSingleton<RocketManager>(fun x -> x.GetService<ILoggerFactory>().CreateLogger<RocketManager>() |> RocketManager) 
     .AddControllers()
-    .AddNewtonsoftJson()
+    .AddNewtonsoftJson(fun options -> Serializer.adjustSettings options.SerializerSettings |> ignore)
   |> ignore
 
   let app = builder.Build()
@@ -33,6 +46,7 @@ let main args =
     .UseAuthorization()
     .UseOpenApi()
     .UseSwaggerUi3(fun s ->
+      s.DocumentTitle <- "Rockets"
       s.EnableTryItOut <- false
       s.Path <- ""
     )

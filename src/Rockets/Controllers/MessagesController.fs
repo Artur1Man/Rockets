@@ -7,7 +7,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.AspNetCore.Http
 open Newtonsoft.Json
 open RocketManager
-open Microsoft.AspNetCore.Mvc
+open Models
 
 
 type MessageTypeDto =
@@ -49,9 +49,9 @@ type MessageDescriptionDto =
 
 type MessageDto =
   {
-    /// Exchange to submit to.
+    /// Message Metadata
     [<JsonRequired>] Metadata : MetadataDto
-    /// Area or Location name.
+    /// Message action
     [<JsonRequired>] Message: MessageDescriptionDto
   }
   member this.toMessage () =
@@ -100,30 +100,56 @@ type MessageDto =
 [<ApiController>]
 [<Route("[controller]")>]
 type MessagesController (logger : ILogger<MessagesController>, rocketManager:RocketManager) =
-    inherit ControllerBase()
+  inherit ControllerBase()
 
+  /// <summary>
+  /// Get all messages grouped by channel
+  /// </summary>
+  
+  /// <param name="sorting">Sorting of rockets. Time sorting by the timestamp of earliest message. Default value = ByChannel</param>
+  [<HttpGet; Route("all")>]
+  member _.Get(sorting:RocketSorting) =
+    task{
+      let! rocketStates = rocketManager.GetMessageAll(sorting)
+      return ok rocketStates
+    }
 
-    [<HttpGet>]
-    member _.Get() =
-       rocketManager.GetAllRocketStates()
-
-    [<HttpGet>]
-    [<Route("test")>]
-    member _.GetTest() =
-       rocketManager.GetAllRockets()
-
-    [<HttpPost>]
-    [<ProducesResponseType(StatusCodes.Status200OK)>]
-    [<ProducesResponseType(StatusCodes.Status400BadRequest)>]
-    member _.Post(message:MessageDto) =
+  /// <summary>
+  /// Get the messages for the given channel
+  /// </summary>
+  [<HttpGet("{channel}")>]
+  member _.GetSingle(channel) =
+    task{
       try
-        let modelMessage = message.toMessage()
-        logger.LogDebug $"Message Post {modelMessage}"
-        rocketManager.AddMessage modelMessage
-        created modelMessage
+        let! rocket = rocketManager.GetMessage channel
+        match rocket with
+        | Some r ->
+          return ok r
+        | None ->
+          return badRequest $"could not find rocket for channel: {channel}"
       with
       | e ->
-        logger.LogWarning(e,"Exception in handling Post message")
-        badRequest e
+        logger.LogWarning(e, "Failed to get rocket state")
+        return badRequest e
+  }
+
+  /// <summary>
+  /// Submit a message
+  /// </summary>
+  /// <response code="201">Message accepted and stored</response>
+  /// <response code="400">Failed to create message.</response>
+  [<HttpPost>]
+  [<ProducesResponseType(StatusCodes.Status201Created)>]
+  [<ProducesResponseType(StatusCodes.Status400BadRequest)>]
+  member _.Post(message:MessageDto) =
+    try
+      let modelMessage = message.toMessage()
+      logger.LogDebug $"Message Post {modelMessage}"
+      rocketManager.AddMessage modelMessage
+      created modelMessage
+    with
+    | e ->
+      logger.LogWarning(e,"Exception in handling Post message")
+      badRequest e
 
 

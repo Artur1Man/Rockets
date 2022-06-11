@@ -18,9 +18,7 @@ for item in n do
 n.MinimumElement
 
 
-
 let arr = [|1;2;3|] |> Set
-
 
 
 let a = arr.Add 12
