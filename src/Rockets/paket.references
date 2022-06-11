@@ -1,0 +1,8 @@
+NLog
+NLog.Web.AspNetCore
+Newtonsoft.Json
+Microsoft.FSharpLu.Json
+NSwag.AspNetCore
+Microsoft.AspNetCore.Mvc.NewtonsoftJson
+Microsoft.FeatureManagement.AspNetCore
+FSharp.Data

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Rockets", "Rockets\Rockets.fsproj", "{CADCAE5D-4C34-48D4-8357-CFE4798F8D42}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CADCAE5D-4C34-48D4-8357-CFE4798F8D42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CADCAE5D-4C34-48D4-8357-CFE4798F8D42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CADCAE5D-4C34-48D4-8357-CFE4798F8D42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CADCAE5D-4C34-48D4-8357-CFE4798F8D42}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {645157E9-42A5-47E6-BC80-E8CEEB8C77BB}
+	EndGlobalSection
+EndGlobal

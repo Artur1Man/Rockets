@@ -1,0 +1,23 @@
+source https://api.nuget.org/v3/index.json
+
+framework: auto-detect
+
+nuget NLog
+nuget NLog.Web.AspNetCore
+nuget Newtonsoft.Json
+nuget NSwag.AspNetCore
+nuget Microsoft.AspNetCore.Mvc.NewtonsoftJson
+nuget Microsoft.FeatureManagement.AspNetCore
+nuget FSharp.Data
+nuget Microsoft.FSharpLu.Json
+
+
+
+group Test
+	source https://api.nuget.org/v3/index.json
+	framework: auto-detect
+
+	nuget xunit
+	nuget xunit.runner.visualstudio
+	nuget Microsoft.NET.Test.Sdk
+	nuget AutoFixture

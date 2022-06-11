@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+	<PublishSingleFile>true</PublishSingleFile>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Models.fs" />
+    <Compile Include="RocketManager.fs" />
+    <Compile Include="Controllers\Common.fs" />
+    <Compile Include="Controllers\MessagesController.fs" />
+    <Compile Include="Controllers\RocketsController.fs" />
+    <None Include="paket.references" />
+    <Compile Include="Program.fs" />
+    <None Include="TestScript.fsx" />
+    <None Include="Playground.fsx" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
