@@ -1,6 +1,6 @@
 # Rockets
 
-Rockets manager project
+Rockets manager project. Written in F# on .NET 6
 
 
 # Build and run locally
